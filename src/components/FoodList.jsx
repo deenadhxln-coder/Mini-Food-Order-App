@@ -1,5 +1,4 @@
-import FoodCard from "./foodcard.jsx";
-
+import FoodCard from "./FoodCard.jsx";
 function FoodList({ foods, onAddToCart }) {
   if (foods.length === 0) {
     return <p className="empty-message">No food items found.</p>;
