@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
+const Food = require("../models/Food");
 
 // POST /api/orders - Create a new order
 router.post("/", async (req, res) => {
@@ -33,11 +34,18 @@ router.post("/", async (req, res) => {
     let calculatedTotal = 0;
 
     for (const item of items) {
-      const foodId = item.food || item.id || item._id;
+      let foodId = item.food || item.id || item._id;
+      
+      // If foodId is missing or not a valid 24-char ObjectId (e.g. old cached cart item), look up by name
       if (!foodId || !mongoose.Types.ObjectId.isValid(foodId)) {
-        return res.status(400).json({
-          message: `Invalid food item ID provided for: ${item.name || "Unknown item"}`,
-        });
+        const matchedFood = await Food.findOne({ name: item.name });
+        if (matchedFood) {
+          foodId = matchedFood._id;
+        } else {
+          return res.status(400).json({
+            message: `Invalid food item ID provided for: ${item.name || "Unknown item"}`,
+          });
+        }
       }
 
       const quantity = Number(item.quantity);
