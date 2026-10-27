@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
-import FoodList from "./components/FoodList";
-import SearchFilter from "./components/SearchFilter";
+import Header from "./components/Header";
+import MenuView from "./components/MenuView";
 import Cart from "./components/Cart";
 import Checkout from "./components/CheckOut";
 import OrderConfirmation from "./components/OrderConfirmation";
@@ -218,57 +218,27 @@ const [cart, setCart] = useState(() => {
 
   return (
     <main className="app-container">
-      <header className="app-header">
-        <div>
-          <h1>Foodie 🍔</h1>
-          <p>Discover your next favourite meal.</p>
-        </div>
-
-        {view !== "confirmation" && (
-          <button
-            type="button"
-            className="cart-toggle"
-            onClick={() =>
-              setView((current) =>
-                current === "cart" ? "menu" : "cart"
-              )
-            }
-          >
-            🛒 Cart ({totalItems})
-          </button>
-        )}
-      </header>
+      <Header
+        view={view}
+        totalItems={totalItems}
+        onToggleCart={() =>
+          setView((current) => (current === "cart" ? "menu" : "cart"))
+        }
+      />
 
       {view === "menu" && (
-        <section>
-          <h2>Our Menu</h2>
-
-          <SearchFilter
-            search={search}
-            setSearch={setSearch}
-            category={category}
-            setCategory={setCategory}
-            sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
-          />
-
-          <p className="results-count">
-            Showing {filteredFoods.length} food items
-          </p>
-
-          
-            {foodsLoading ? (
-              <p>Loading delicious food...</p>
-            ) : foodsError ? (
-              <p role="alert">{foodsError}</p>
-            ) : (
-              <FoodList
-                foods={filteredFoods}
-                onAddToCart={handleAddToCart}
-              />
-            )}
-
-        </section>
+        <MenuView
+          search={search}
+          setSearch={setSearch}
+          category={category}
+          setCategory={setCategory}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          foods={filteredFoods}
+          loading={foodsLoading}
+          error={foodsError}
+          onAddToCart={handleAddToCart}
+        />
       )}
 
       {view === "cart" && (
