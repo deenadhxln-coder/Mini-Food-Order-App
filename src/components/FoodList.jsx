@@ -1,4 +1,4 @@
-import FoodCard from "./foodcard";
+import FoodCard from "/FoodCard";
 
 function FoodList({ foods, onAddToCart }) {
   if (foods.length === 0) {
