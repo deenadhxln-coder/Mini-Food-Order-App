@@ -5,7 +5,8 @@ function OrderConfirmation({ order, onContinueShopping }) {
       <div className="confirmation-icon">✓</div>
 
       <h2>Order Placed Successfully!</h2>
-      <p>Order ID: {order.orderId}</p>
+      <p><strong>Order ID:</strong> {order._id || order.orderId}</p>
+      <p><strong>Status:</strong> <span style={{ color: "#18864b", fontWeight: "bold" }}>{order.status || "Placed"}</span></p>
 
       <p>
         Thank you, {order.customer.name}! Your order has been
@@ -15,8 +16,8 @@ function OrderConfirmation({ order, onContinueShopping }) {
       <div className="confirmation-summary">
         <h3>Order Summary</h3>
 
-        {order.items.map((item) => (
-          <div className="summary-item" key={item.id}>
+        {order.items.map((item, index) => (
+          <div className="summary-item" key={item._id || item.id || item.food || index}>
             <span>
               {item.name} × {item.quantity}
             </span>

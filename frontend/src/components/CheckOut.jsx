@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 
-function Checkout({ cart, onPlaceOrder, onBack }) {
+function Checkout({ cart, onPlaceOrder, onBack, isPlacingOrder = false, submitError = "" }) {
   const [customer, setCustomer] = useState({
     name: "",
     mobile: "",
@@ -113,13 +113,14 @@ function Checkout({ cart, onPlaceOrder, onBack }) {
           )}
 
           {errors.cart && <p className="form-error">{errors.cart}</p>}
+          {submitError && <p className="form-error" role="alert">{submitError}</p>}
 
           <button
             type="submit"
             className="place-order-button"
-            disabled={cart.length === 0}
+            disabled={cart.length === 0 || isPlacingOrder}
           >
-            Place Order · ₹{totalPrice}
+            {isPlacingOrder ? "Placing Order..." : `Place Order · ₹${totalPrice}`}
           </button>
         </form>
 
