@@ -1,4 +1,4 @@
-import FoodCard from "/FoodCard.jsx";
+import FoodCard from "./FoodCard.jsx";
 
 function FoodList({ foods, onAddToCart }) {
   if (foods.length === 0) {
