@@ -86,6 +86,38 @@ button {
   background: #c74724;
 }
 
+.card-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-quantity-controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: #e45b32;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.card-quantity-controls button:hover {
+  background: #c74724;
+}
+
+.card-quantity-controls span {
+  min-width: 18px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+}
+
 .empty-message {
   padding: 32px 0;
   text-align: center;

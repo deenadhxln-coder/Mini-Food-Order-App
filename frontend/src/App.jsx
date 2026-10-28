@@ -36,7 +36,7 @@ function App() {
 
         const formattedFoods = data.map((food) => ({
           ...food,
-          id: food._id,
+          id: food.id || food._id,
         }));
 
         setFoods(formattedFoods);
@@ -94,20 +94,22 @@ const [cart, setCart] = useState(() => {
   }, [toast]);
 
   function handleAddToCart(food) {
+    const foodId = food.id || food._id;
+
     setCart((currentCart) => {
       const existingItem = currentCart.find(
-        (item) => item.id === food.id
+        (item) => item.id === foodId
       );
 
       if (existingItem) {
         return currentCart.map((item) =>
-          item.id === food.id
+          item.id === foodId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
 
-      return [...currentCart, { ...food, quantity: 1 }];
+      return [...currentCart, { ...food, id: foodId, quantity: 1 }];
     });
 
     setToast(`${food.name} added to cart!`);
@@ -237,7 +239,10 @@ const [cart, setCart] = useState(() => {
           foods={filteredFoods}
           loading={foodsLoading}
           error={foodsError}
+          cart={cart}
           onAddToCart={handleAddToCart}
+          onIncrease={handleIncrease}
+          onDecrease={handleDecrease}
         />
       )}
 

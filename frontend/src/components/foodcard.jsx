@@ -1,5 +1,7 @@
 
-function FoodCard({ food, onAddToCart }) {
+function FoodCard({ food, quantity = 0, onAddToCart, onIncrease, onDecrease }) {
+  const foodId = food.id || food._id;
+
   return (
     <article className="food-card">
       <img
@@ -26,12 +28,32 @@ function FoodCard({ food, onAddToCart }) {
         <div className="food-card-footer">
           <strong>₹{food.price}</strong>
 
-          <button
-            type="button"
-            onClick={() => onAddToCart(food)}
-          >
-            Add to Cart
-          </button>
+          {quantity > 0 ? (
+            <div className="card-quantity-controls">
+              <button
+                type="button"
+                onClick={() => onDecrease(foodId)}
+                aria-label={`Decrease ${food.name} quantity`}
+              >
+                −
+              </button>
+              <span>{quantity}</span>
+              <button
+                type="button"
+                onClick={() => onIncrease(foodId)}
+                aria-label={`Increase ${food.name} quantity`}
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onAddToCart(food)}
+            >
+              Add to Cart
+            </button>
+          )}
         </div>
       </div>
     </article>

@@ -11,7 +11,10 @@ function MenuView({
   foods,
   loading,
   error,
+  cart = [],
   onAddToCart,
+  onIncrease,
+  onDecrease,
 }) {
   return (
     <section>
@@ -35,7 +38,13 @@ function MenuView({
       ) : error ? (
         <p role="alert">{error}</p>
       ) : (
-        <FoodList foods={foods} onAddToCart={onAddToCart} />
+        <FoodList
+          foods={foods}
+          cart={cart}
+          onAddToCart={onAddToCart}
+          onIncrease={onIncrease}
+          onDecrease={onDecrease}
+        />
       )}
     </section>
   );
