@@ -143,4 +143,29 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// DELETE /api/orders/:id - Delete an order by ID
+router.delete("/:id", async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid order ID format." });
+    }
+
+    const deletedOrder = await Order.findByIdAndDelete(req.params.id);
+
+    if (!deletedOrder) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    res.status(200).json({
+      message: "Order deleted successfully!",
+      deletedOrder,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete order.",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
