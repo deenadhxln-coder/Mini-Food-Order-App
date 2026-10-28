@@ -168,4 +168,45 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// PATCH /api/orders/:id/status - Update order status (e.g. Cancelled, Preparing, Delivered)
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ["Placed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
+
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid order ID format." });
+    }
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    if (status === "Cancelled" && order.status === "Delivered") {
+      return res.status(400).json({ message: "Cannot cancel an order that has already been delivered." });
+    }
+
+    order.status = status;
+    const updatedOrder = await order.save();
+
+    res.status(200).json({
+      message: `Order status updated to ${status}!`,
+      order: updatedOrder,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update order status.",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

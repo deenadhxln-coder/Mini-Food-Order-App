@@ -1,4 +1,4 @@
-function Header({ view, totalItems, onToggleCart }) {
+function Header({ view, totalItems, onToggleCart, onToggleOrders }) {
   return (
     <header className="app-header">
       <div>
@@ -6,15 +6,27 @@ function Header({ view, totalItems, onToggleCart }) {
         <p>Discover your next favourite meal.</p>
       </div>
 
-      {view !== "confirmation" && (
-        <button
-          type="button"
-          className="cart-toggle"
-          onClick={onToggleCart}
-        >
-          🛒 Cart ({totalItems})
-        </button>
-      )}
+      <div className="header-actions">
+        {view !== "confirmation" && (
+          <>
+            <button
+              type="button"
+              className={`nav-button ${view === "orders" ? "nav-button-active" : ""}`}
+              onClick={onToggleOrders}
+            >
+              {view === "orders" ? "🍽️ Menu" : "📦 My Orders"}
+            </button>
+
+            <button
+              type="button"
+              className={`cart-toggle ${view === "cart" ? "nav-button-active" : ""}`}
+              onClick={onToggleCart}
+            >
+              🛒 Cart ({totalItems})
+            </button>
+          </>
+        )}
+      </div>
     </header>
   );
 }

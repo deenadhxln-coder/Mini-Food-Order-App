@@ -5,6 +5,7 @@ import MenuView from "./components/MenuView";
 import Cart from "./components/Cart";
 import Checkout from "./components/CheckOut";
 import OrderConfirmation from "./components/OrderConfirmation";
+import OrdersView from "./components/OrdersView";
 import Toast from "./components/Toast";
 import "./App.css";
 
@@ -19,6 +20,10 @@ function App() {
   const [foodsError, setFoodsError] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
 
   useEffect(() => {
     async function fetchFoods() {
@@ -54,24 +59,24 @@ function App() {
   }, []);
 
 
-const [cart, setCart] = useState(() => {
-  try {
-    const savedCart = localStorage.getItem("foodie-cart");
-    const parsedCart = savedCart ? JSON.parse(savedCart) : [];
+  const [cart, setCart] = useState(() => {
+    try {
+      const savedCart = localStorage.getItem("foodie-cart");
+      const parsedCart = savedCart ? JSON.parse(savedCart) : [];
 
-    if (!Array.isArray(parsedCart)) return [];
+      if (!Array.isArray(parsedCart)) return [];
 
-    return parsedCart.filter(
-      (item) =>
-        item &&
-        item.name &&
-        Number.isInteger(item.quantity) &&
-        item.quantity > 0
-    );
-  } catch {
-    return [];
-  }
-});
+      return parsedCart.filter(
+        (item) =>
+          item &&
+          item.name &&
+          Number.isInteger(item.quantity) &&
+          item.quantity > 0
+      );
+    } catch {
+      return [];
+    }
+  });
 
 
   const [view, setView] = useState("menu");
@@ -193,6 +198,50 @@ const [cart, setCart] = useState(() => {
     }
   }
 
+  async function fetchOrders() {
+    try {
+      setOrdersLoading(true);
+      setOrdersError("");
+      const response = await fetch(`${API_BASE_URL}/api/orders`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders.");
+      }
+      const data = await response.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      setOrdersError("Unable to load orders. Please try again.");
+    } finally {
+      setOrdersLoading(false);
+    }
+  }
+
+  async function handleCancelOrder(orderId) {
+    try {
+      setIsCancellingOrder(true);
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to cancel order.");
+      }
+
+      setToast("Order cancelled successfully!");
+      setOrders((prev) => prev.filter((o) => o._id !== orderId));
+
+      if (order && order._id === orderId) {
+        setOrder((prev) => ({ ...prev, status: "Cancelled" }));
+      }
+    } catch (error) {
+      console.error("Failed to cancel order:", error);
+      setToast(error.message || "Unable to cancel order.");
+    } finally {
+      setIsCancellingOrder(false);
+    }
+  }
+
   function handleContinueShopping() {
     setOrder(null);
     setCheckoutError("");
@@ -226,6 +275,14 @@ const [cart, setCart] = useState(() => {
         onToggleCart={() =>
           setView((current) => (current === "cart" ? "menu" : "cart"))
         }
+        onToggleOrders={() => {
+          if (view !== "orders") {
+            fetchOrders();
+            setView("orders");
+          } else {
+            setView("menu");
+          }
+        }}
       />
 
       {view === "menu" && (
@@ -273,6 +330,24 @@ const [cart, setCart] = useState(() => {
         <OrderConfirmation
           order={order}
           onContinueShopping={handleContinueShopping}
+          onCancelOrder={handleCancelOrder}
+          onViewOrders={() => {
+            fetchOrders();
+            setView("orders");
+          }}
+          isCancelling={isCancellingOrder}
+        />
+      )}
+
+      {view === "orders" && (
+        <OrdersView
+          orders={orders}
+          loading={ordersLoading}
+          error={ordersError}
+          onCancelOrder={handleCancelOrder}
+          onBackToMenu={() => setView("menu")}
+          onRefreshOrders={fetchOrders}
+          isCancelling={isCancellingOrder}
         />
       )}
 
