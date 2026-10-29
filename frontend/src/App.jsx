@@ -321,6 +321,10 @@ function App() {
             fetchOrders();
             setView("orders");
           }}
+          onSelectCategory={(selectedCat) => {
+            setCategory(selectedCat);
+            handleBuyFoods();
+          }}
         />
       )}
 
