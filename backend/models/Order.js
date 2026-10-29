@@ -1,6 +1,14 @@
 
 const mongoose = require("mongoose");
 
+const ORDER_STATUSES = [
+  "Placed",
+  "Preparing",
+  "Out for Delivery",
+  "Delivered",
+  "Cancelled",
+];
+
 const orderSchema = new mongoose.Schema(
   {
     customer: {
@@ -51,11 +59,14 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Placed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"],
+      enum: ORDER_STATUSES,
       default: "Placed",
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", orderSchema);
+Order.ORDER_STATUSES = ORDER_STATUSES;
+
+module.exports = Order;

@@ -35,10 +35,11 @@ router.post("/", async (req, res) => {
 
     for (const item of items) {
       let foodId = item.food || item.id || item._id;
+      let matchedFood = null;
       
       // If foodId is missing or not a valid 24-char ObjectId (e.g. old cached cart item), look up by name
       if (!foodId || !mongoose.Types.ObjectId.isValid(foodId)) {
-        const matchedFood = await Food.findOne({ name: item.name });
+        matchedFood = await Food.findOne({ name: item.name });
         if (matchedFood) {
           foodId = matchedFood._id;
         } else {
@@ -46,26 +47,30 @@ router.post("/", async (req, res) => {
             message: `Invalid food item ID provided for: ${item.name || "Unknown item"}`,
           });
         }
+      } else {
+        matchedFood = await Food.findById(foodId);
       }
 
       const quantity = Number(item.quantity);
-      const price = Number(item.price);
+      // Source price dynamically from verified food item in database if present
+      const price = matchedFood && typeof matchedFood.price === "number" ? matchedFood.price : Number(item.price);
+      const name = matchedFood?.name || item.name;
 
       if (!quantity || quantity < 1) {
         return res.status(400).json({
-          message: `Invalid quantity for item: ${item.name || "Unknown item"}`,
+          message: `Invalid quantity for item: ${name || "Unknown item"}`,
         });
       }
 
       if (price < 0 || isNaN(price)) {
         return res.status(400).json({
-          message: `Invalid price for item: ${item.name || "Unknown item"}`,
+          message: `Invalid price for item: ${name || "Unknown item"}`,
         });
       }
 
       formattedItems.push({
         food: foodId,
-        name: item.name,
+        name,
         price,
         quantity,
       });
@@ -172,7 +177,7 @@ router.delete("/:id", async (req, res) => {
 router.patch("/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
-    const validStatuses = ["Placed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
+    const validStatuses = Order.ORDER_STATUSES || (Order.schema.path("status") ? Order.schema.path("status").enumValues : []);
 
     if (!status || !validStatuses.includes(status)) {
       return res.status(400).json({

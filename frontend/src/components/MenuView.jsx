@@ -8,6 +8,7 @@ function MenuView({
   setCategory,
   sortOrder,
   setSortOrder,
+  categories = ["All"],
   foods,
   loading,
   error,
@@ -27,6 +28,7 @@ function MenuView({
         setCategory={setCategory}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
+        categories={categories}
       />
 
       <p className="results-count">

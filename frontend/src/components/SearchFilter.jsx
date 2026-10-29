@@ -6,6 +6,7 @@ function SearchFilter({
   setCategory,
   sortOrder,
   setSortOrder,
+  categories = ["All"],
 }) {
   return (
     <div className="search-filter">
@@ -20,11 +21,11 @@ function SearchFilter({
         value={category}
         onChange={(e) => setCategory(e.target.value)}
       >
-        <option value="All">All Categories</option>
-        <option value="Pizza">Pizza</option>
-        <option value="Burger">Burger</option>
-        <option value="Drinks">Drinks</option>
-        <option value="Desserts">Desserts</option>
+        {categories.map((cat) => (
+          <option key={cat} value={cat}>
+            {cat === "All" ? "All Categories" : cat}
+          </option>
+        ))}
       </select>
 
       <select

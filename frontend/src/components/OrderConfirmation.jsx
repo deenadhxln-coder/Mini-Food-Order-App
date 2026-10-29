@@ -6,6 +6,23 @@ function OrderConfirmation({ order, onContinueShopping, onCancelOrder, onViewOrd
     }
   }
 
+  function getStatusClass(status) {
+    switch (status) {
+      case "Placed":
+        return "status-badge status-placed";
+      case "Preparing":
+        return "status-badge status-preparing";
+      case "Out for Delivery":
+        return "status-badge status-delivery";
+      case "Delivered":
+        return "status-badge status-delivered";
+      case "Cancelled":
+        return "status-badge status-cancelled";
+      default:
+        return "status-badge";
+    }
+  }
+
   const canCancel = order.status === "Placed" || order.status === "Preparing";
 
   return (
@@ -16,7 +33,7 @@ function OrderConfirmation({ order, onContinueShopping, onCancelOrder, onViewOrd
       <p><strong>Order ID:</strong> {order._id || order.orderId}</p>
       <p>
         <strong>Status:</strong>{" "}
-        <span style={{ color: order.status === "Cancelled" ? "#d32f2f" : "#18864b", fontWeight: "bold" }}>
+        <span className={getStatusClass(order.status)}>
           {order.status || "Placed"}
         </span>
       </p>

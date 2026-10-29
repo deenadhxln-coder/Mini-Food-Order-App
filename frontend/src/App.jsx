@@ -10,6 +10,7 @@ import Toast from "./components/Toast";
 import "./App.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const CART_STORAGE_KEY = "foodie-cart";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -32,14 +33,14 @@ function App() {
         setFoodsError("");
 
         const response = await fetch(`${API_BASE_URL}/api/foods`);
+        const data = await response.json().catch(() => null);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch food menu.");
+          throw new Error(data?.message || "Failed to fetch food menu.");
         }
 
-        const data = await response.json();
-
-        const formattedFoods = data.map((food) => ({
+        const foodList = Array.isArray(data) ? data : [];
+        const formattedFoods = foodList.map((food) => ({
           ...food,
           id: food.id || food._id,
         }));
@@ -48,7 +49,7 @@ function App() {
       } catch (error) {
         console.error("Error fetching foods:", error);
         setFoodsError(
-          "Unable to load the menu. Please ensure the backend is running and try again."
+          error.message || "Unable to load the menu. Please ensure the backend is running and try again."
         );
       } finally {
         setFoodsLoading(false);
@@ -61,7 +62,7 @@ function App() {
 
   const [cart, setCart] = useState(() => {
     try {
-      const savedCart = localStorage.getItem("foodie-cart");
+      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
       const parsedCart = savedCart ? JSON.parse(savedCart) : [];
 
       if (!Array.isArray(parsedCart)) return [];
@@ -85,7 +86,7 @@ function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem("foodie-cart", JSON.stringify(cart));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
     } catch (error) {
       console.error("Could not save cart:", error);
     }
@@ -176,18 +177,18 @@ function App() {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to place order.");
+        throw new Error(data?.message || "Failed to place order.");
       }
 
-      const placedOrder = data.order || data;
+      const placedOrder = data?.order || data;
 
       setOrder(placedOrder);
       setCart([]);
       setView("confirmation");
-      setToast("Your order has been placed successfully!");
+      setToast(data?.message || "Your order has been placed successfully!");
     } catch (error) {
       console.error("Order placement failed:", error);
       setCheckoutError(
@@ -203,14 +204,16 @@ function App() {
       setOrdersLoading(true);
       setOrdersError("");
       const response = await fetch(`${API_BASE_URL}/api/orders`);
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error("Failed to fetch orders.");
+        throw new Error(data?.message || "Failed to fetch orders.");
       }
-      const data = await response.json();
+
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      setOrdersError("Unable to load orders. Please try again.");
+      setOrdersError(error.message || "Unable to load orders. Please try again.");
     } finally {
       setOrdersLoading(false);
     }
@@ -222,13 +225,13 @@ function App() {
       const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
         method: "DELETE",
       });
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to cancel order.");
+        throw new Error(data?.message || "Failed to cancel order.");
       }
 
-      setToast("Order cancelled successfully!");
+      setToast(data?.message || "Order cancelled successfully!");
       setOrders((prev) => prev.filter((o) => o._id !== orderId));
 
       if (order && order._id === orderId) {
@@ -248,6 +251,11 @@ function App() {
     setView("menu");
     setToast("");
   }
+
+  const categories = [
+    "All",
+    ...Array.from(new Set(foods.map((food) => food.category).filter(Boolean))),
+  ];
 
   const filteredFoods = foods
     .filter((food) =>
@@ -293,6 +301,7 @@ function App() {
           setCategory={setCategory}
           sortOrder={sortOrder}
           setSortOrder={setSortOrder}
+          categories={categories}
           foods={filteredFoods}
           loading={foodsLoading}
           error={foodsError}
