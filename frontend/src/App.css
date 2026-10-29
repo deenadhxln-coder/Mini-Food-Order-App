@@ -1,4 +1,3 @@
-
 html {
   scroll-behavior: smooth;
 }
@@ -329,7 +328,7 @@ button {
   border: 1px solid #eee;
 }
 
-.cart-item > img {
+.cart-item>img {
   width: 100px;
   height: 90px;
   border-radius: 8px;
@@ -393,7 +392,7 @@ button {
     flex-wrap: wrap;
   }
 
-  .cart-item > img {
+  .cart-item>img {
     width: 80px;
     height: 80px;
   }
@@ -1084,6 +1083,7 @@ button {
   0% {
     transform: translateY(0px);
   }
+
   100% {
     transform: translateY(-8px);
   }
@@ -1174,6 +1174,7 @@ button {
     opacity: 1;
     transform: translateY(0);
   }
+
   100% {
     opacity: 0;
     transform: translateY(12px);
@@ -1313,7 +1314,7 @@ button {
 
 .footer-email-link {
   color: #94a3b8;
-  text-decoration: underline;
+  text-decoration: none;
   text-underline-offset: 3px;
   transition: color 0.2s;
 }
