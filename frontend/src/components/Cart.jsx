@@ -3,6 +3,8 @@ import CartItem from "./CartItem";
 
 function Cart({
   cart,
+  loading = false,
+  error = "",
   onIncrease,
   onDecrease,
   onRemove,
@@ -22,7 +24,11 @@ function Cart({
     <section className="cart-section">
       <h2>Your Shopping Cart</h2>
 
-      {cart.length === 0 ? (
+      {loading ? (
+        <p className="loading-state">Loading your cart...</p>
+      ) : error ? (
+        <p className="error-message" role="alert">{error}</p>
+      ) : cart.length === 0 ? (
         <p className="empty-cart">
           Your cart is empty. Add some delicious food!
         </p>

@@ -5,6 +5,7 @@ const cors = require("cors");
 require("dotenv").config();
 const foodRoutes = require("./routes/foodroutes");
 const orderRoutes = require("./routes/orderroutes");
+const cartRoutes = require("./routes/cartroutes");
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/foods", foodRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.get("/", (req, res) => {
   res.json({

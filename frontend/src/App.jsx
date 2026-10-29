@@ -12,7 +12,23 @@ import Toast from "./components/Toast";
 import "./App.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-const CART_STORAGE_KEY = "foodie-cart";
+const CART_SESSION_KEY = "foodie-cart-session";
+
+function getCartSessionId() {
+  try {
+    let sessionId = localStorage.getItem(CART_SESSION_KEY);
+    if (!sessionId) {
+      sessionId =
+        "cart_" +
+        Math.random().toString(36).substring(2, 9) +
+        Date.now().toString(36);
+      localStorage.setItem(CART_SESSION_KEY, sessionId);
+    }
+    return sessionId;
+  } catch {
+    return "default_user";
+  }
+}
 
 function App() {
   const [search, setSearch] = useState("");
@@ -21,6 +37,9 @@ function App() {
   const [foods, setFoods] = useState([]);
   const [foodsLoading, setFoodsLoading] = useState(true);
   const [foodsError, setFoodsError] = useState("");
+  const [cart, setCart] = useState([]);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [cartError, setCartError] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [orders, setOrders] = useState([]);
@@ -61,38 +80,55 @@ function App() {
     fetchFoods();
   }, []);
 
+  async function cartApiRequest(endpoint = "", options = {}) {
+    const sessionId = getCartSessionId();
+    const headers = {
+      "Content-Type": "application/json",
+      "x-session-id": sessionId,
+      ...(options.headers || {}),
+    };
 
-  const [cart, setCart] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-      const parsedCart = savedCart ? JSON.parse(savedCart) : [];
+    const response = await fetch(`${API_BASE_URL}/api/cart${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-      if (!Array.isArray(parsedCart)) return [];
+    const data = await response.json().catch(() => null);
 
-      return parsedCart.filter(
-        (item) =>
-          item &&
-          item.name &&
-          Number.isInteger(item.quantity) &&
-          item.quantity > 0
-      );
-    } catch {
-      return [];
+    if (!response.ok) {
+      throw new Error(data?.message || "Cart operation failed.");
     }
-  });
 
+    return data;
+  }
+
+  async function fetchCart() {
+    try {
+      setCartLoading(true);
+      setCartError("");
+
+      const data = await cartApiRequest();
+      const items = Array.isArray(data?.items) ? data.items : [];
+      setCart(items);
+      return items;
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      setCartError(
+        error.message || "Unable to load cart. Please check your backend connection."
+      );
+      return [];
+    } finally {
+      setCartLoading(false);
+    }
+  }
 
   const [view, setView] = useState("menu");
   const [order, setOrder] = useState(null);
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-    } catch (error) {
-      console.error("Could not save cart:", error);
-    }
-  }, [cart]);
+    fetchCart();
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -101,58 +137,81 @@ function App() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  function handleAddToCart(food) {
+  async function handleToggleCart() {
+    if (view !== "cart") {
+      fetchCart();
+      setView("cart");
+    } else {
+      setView("menu");
+    }
+  }
+
+  async function handleAddToCart(food) {
     const foodId = food.id || food._id;
 
-    setCart((currentCart) => {
-      const existingItem = currentCart.find(
-        (item) => item.id === foodId
-      );
+    try {
+      const data = await cartApiRequest("/add", {
+        method: "POST",
+        body: JSON.stringify({ foodId, food }),
+      });
 
-      if (existingItem) {
-        return currentCart.map((item) =>
-          item.id === foodId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+      if (Array.isArray(data?.items)) {
+        setCart(data.items);
       }
-
-      return [...currentCart, { ...food, id: foodId, quantity: 1 }];
-    });
-
-    setToast(`${food.name} added to cart!`);
+      setToast(data?.message || `${food.name} added to cart!`);
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      setToast(error.message || "Failed to add item to cart.");
+    }
   }
 
-  function handleIncrease(id) {
-    setCart((currentCart) =>
-      currentCart.map((item) =>
-        item.id === id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
+  async function handleIncrease(id) {
+    try {
+      const data = await cartApiRequest(`/increase/${id}`, {
+        method: "PATCH",
+      });
+
+      if (Array.isArray(data?.items)) {
+        setCart(data.items);
+      }
+    } catch (error) {
+      console.error("Failed to increase quantity:", error);
+      setToast(error.message || "Failed to update item quantity.");
+    }
   }
 
-  function handleDecrease(id) {
-    setCart((currentCart) =>
-      currentCart
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
+  async function handleDecrease(id) {
+    try {
+      const data = await cartApiRequest(`/decrease/${id}`, {
+        method: "PATCH",
+      });
+
+      if (Array.isArray(data?.items)) {
+        setCart(data.items);
+      }
+    } catch (error) {
+      console.error("Failed to decrease quantity:", error);
+      setToast(error.message || "Failed to update item quantity.");
+    }
   }
 
-  function handleRemove(id) {
+  async function handleRemove(id) {
     const item = cart.find((food) => food.id === id);
+    try {
+      const data = await cartApiRequest(`/item/${id}`, {
+        method: "DELETE",
+      });
 
-    setCart((currentCart) =>
-      currentCart.filter((food) => food.id !== id)
-    );
-
-    if (item) setToast(`${item.name} removed from cart.`);
+      if (Array.isArray(data?.items)) {
+        setCart(data.items);
+      }
+      if (item) {
+        setToast(data?.message || `${item.name} removed from cart.`);
+      }
+    } catch (error) {
+      console.error("Failed to remove item:", error);
+      setToast(error.message || "Failed to remove item.");
+    }
   }
 
   async function handlePlaceOrder(orderDetails) {
@@ -189,6 +248,7 @@ function App() {
 
       setOrder(placedOrder);
       setCart([]);
+      await cartApiRequest("", { method: "DELETE" }).catch(() => null);
       setView("confirmation");
       setToast(data?.message || "Your order has been placed successfully!");
     } catch (error) {
@@ -299,9 +359,7 @@ function App() {
       <Header
         view={view}
         totalItems={totalItems}
-        onToggleCart={() =>
-          setView((current) => (current === "cart" ? "menu" : "cart"))
-        }
+        onToggleCart={handleToggleCart}
         onToggleOrders={() => {
           if (view !== "orders") {
             fetchOrders();
@@ -347,6 +405,8 @@ function App() {
         {view === "cart" && (
           <Cart
             cart={cart}
+            loading={cartLoading}
+            error={cartError}
             onIncrease={handleIncrease}
             onDecrease={handleDecrease}
             onRemove={handleRemove}
