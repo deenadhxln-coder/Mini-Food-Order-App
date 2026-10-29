@@ -18,8 +18,14 @@ function MenuView({
   onDecrease,
 }) {
   return (
-    <section>
-      <h2>Our Menu</h2>
+    <section id="buy-foods-section" className="menu-section">
+      <div className="section-title-wrap">
+        <span className="section-tag">MENU CATALOG</span>
+        <h2>Explore & Buy Foods</h2>
+        <p className="section-desc">
+          Choose from our chef-crafted recipes, add to cart, and enjoy fresh doorstep delivery.
+        </p>
+      </div>
 
       <SearchFilter
         search={search}

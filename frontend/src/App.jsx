@@ -1,11 +1,13 @@
 
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
+import Hero from "./components/Hero";
 import MenuView from "./components/MenuView";
 import Cart from "./components/Cart";
 import Checkout from "./components/CheckOut";
 import OrderConfirmation from "./components/OrderConfirmation";
 import OrdersView from "./components/OrdersView";
+import Footer from "./components/Footer";
 import Toast from "./components/Toast";
 import "./App.css";
 
@@ -252,6 +254,23 @@ function App() {
     setToast("");
   }
 
+  function handleBuyFoods() {
+    if (view !== "menu") {
+      setView("menu");
+    }
+    setTimeout(() => {
+      const section = document.getElementById("buy-foods-section");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 50);
+  }
+
+  function handleGoHome() {
+    setView("menu");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const categories = [
     "All",
     ...Array.from(new Set(foods.map((food) => food.category).filter(Boolean))),
@@ -276,7 +295,7 @@ function App() {
   );
 
   return (
-    <main className="app-container">
+    <div className="app-layout">
       <Header
         view={view}
         totalItems={totalItems}
@@ -291,77 +310,102 @@ function App() {
             setView("menu");
           }
         }}
+        onBuyFoods={handleBuyFoods}
+        onGoHome={handleGoHome}
       />
 
-      {view === "menu" && (
-        <MenuView
-          search={search}
-          setSearch={setSearch}
-          category={category}
-          setCategory={setCategory}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          categories={categories}
-          foods={filteredFoods}
-          loading={foodsLoading}
-          error={foodsError}
-          cart={cart}
-          onAddToCart={handleAddToCart}
-          onIncrease={handleIncrease}
-          onDecrease={handleDecrease}
-        />
-      )}
+      <main className="app-container">
+        {view === "menu" && (
+          <>
+            <Hero
+              onBuyFoods={handleBuyFoods}
+              onExploreOrders={() => {
+                fetchOrders();
+                setView("orders");
+              }}
+            />
+            <MenuView
+              search={search}
+              setSearch={setSearch}
+              category={category}
+              setCategory={setCategory}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+              categories={categories}
+              foods={filteredFoods}
+              loading={foodsLoading}
+              error={foodsError}
+              cart={cart}
+              onAddToCart={handleAddToCart}
+              onIncrease={handleIncrease}
+              onDecrease={handleDecrease}
+            />
+          </>
+        )}
 
-      {view === "cart" && (
-        <Cart
-          cart={cart}
-          onIncrease={handleIncrease}
-          onDecrease={handleDecrease}
-          onRemove={handleRemove}
-          onCheckout={() => setView("checkout")}
-        />
-      )}
+        {view === "cart" && (
+          <Cart
+            cart={cart}
+            onIncrease={handleIncrease}
+            onDecrease={handleDecrease}
+            onRemove={handleRemove}
+            onCheckout={() => setView("checkout")}
+          />
+        )}
 
-      {view === "checkout" && (
-        <Checkout
-          cart={cart}
-          onPlaceOrder={handlePlaceOrder}
-          onBack={() => {
-            setCheckoutError("");
-            setView("cart");
-          }}
-          isPlacingOrder={isPlacingOrder}
-          submitError={checkoutError}
-        />
-      )}
+        {view === "checkout" && (
+          <Checkout
+            cart={cart}
+            onPlaceOrder={handlePlaceOrder}
+            onBack={() => {
+              setCheckoutError("");
+              setView("cart");
+            }}
+            isPlacingOrder={isPlacingOrder}
+            submitError={checkoutError}
+          />
+        )}
 
-      {view === "confirmation" && order && (
-        <OrderConfirmation
-          order={order}
-          onContinueShopping={handleContinueShopping}
-          onCancelOrder={handleCancelOrder}
-          onViewOrders={() => {
-            fetchOrders();
-            setView("orders");
-          }}
-          isCancelling={isCancellingOrder}
-        />
-      )}
+        {view === "confirmation" && order && (
+          <OrderConfirmation
+            order={order}
+            onContinueShopping={handleContinueShopping}
+            onCancelOrder={handleCancelOrder}
+            onViewOrders={() => {
+              fetchOrders();
+              setView("orders");
+            }}
+            isCancelling={isCancellingOrder}
+          />
+        )}
 
-      {view === "orders" && (
-        <OrdersView
-          orders={orders}
-          loading={ordersLoading}
-          error={ordersError}
-          onCancelOrder={handleCancelOrder}
-          onBackToMenu={() => setView("menu")}
-          onRefreshOrders={fetchOrders}
-          isCancelling={isCancellingOrder}
-        />
-      )}
+        {view === "orders" && (
+          <OrdersView
+            orders={orders}
+            loading={ordersLoading}
+            error={ordersError}
+            onCancelOrder={handleCancelOrder}
+            onBackToMenu={() => setView("menu")}
+            onRefreshOrders={fetchOrders}
+            isCancelling={isCancellingOrder}
+          />
+        )}
 
-      <Toast message={toast} />
-    </main>
+        <Toast message={toast} />
+      </main>
+
+      <Footer
+        onNavigateMenu={handleBuyFoods}
+        onNavigateOrders={() => {
+          fetchOrders();
+          setView("orders");
+        }}
+        onNavigateCart={() =>
+          setView((current) => (current === "cart" ? "menu" : "cart"))
+        }
+        totalItems={totalItems}
+      />
+    </div>
   );
 }
 
