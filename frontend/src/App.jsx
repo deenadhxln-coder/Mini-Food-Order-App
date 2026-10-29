@@ -314,20 +314,22 @@ function App() {
         onGoHome={handleGoHome}
       />
 
+      {view === "menu" && (
+        <Hero
+          onBuyFoods={handleBuyFoods}
+          onExploreOrders={() => {
+            fetchOrders();
+            setView("orders");
+          }}
+        />
+      )}
+
       <main className="app-container">
         {view === "menu" && (
-          <>
-            <Hero
-              onBuyFoods={handleBuyFoods}
-              onExploreOrders={() => {
-                fetchOrders();
-                setView("orders");
-              }}
-            />
-            <MenuView
-              search={search}
-              setSearch={setSearch}
-              category={category}
+          <MenuView
+            search={search}
+            setSearch={setSearch}
+            category={category}
               setCategory={setCategory}
               sortOrder={sortOrder}
               setSortOrder={setSortOrder}
@@ -340,7 +342,6 @@ function App() {
               onIncrease={handleIncrease}
               onDecrease={handleDecrease}
             />
-          </>
         )}
 
         {view === "cart" && (
