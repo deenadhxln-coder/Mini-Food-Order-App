@@ -5,6 +5,7 @@ function Cart({
   cart,
   loading = false,
   error = "",
+  updatingItemId = null,
   onIncrease,
   onDecrease,
   onRemove,
@@ -25,7 +26,10 @@ function Cart({
       <h2>Your Shopping Cart</h2>
 
       {loading ? (
-        <p className="loading-state">Loading your cart...</p>
+        <div className="loading-container">
+          <div className="app-spinner app-spinner-lg" aria-hidden="true" />
+          <p>Loading your cart...</p>
+        </div>
       ) : error ? (
         <p className="error-message" role="alert">{error}</p>
       ) : cart.length === 0 ? (
@@ -39,6 +43,7 @@ function Cart({
               <CartItem
                 key={item.id}
                 item={item}
+                isUpdating={updatingItemId === item.id}
                 onIncrease={onIncrease}
                 onDecrease={onDecrease}
                 onRemove={onRemove}

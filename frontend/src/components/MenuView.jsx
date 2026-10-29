@@ -13,6 +13,7 @@ function MenuView({
   loading,
   error,
   cart = [],
+  updatingItemId = null,
   onAddToCart,
   onIncrease,
   onDecrease,
@@ -42,13 +43,17 @@ function MenuView({
       </p>
 
       {loading ? (
-        <p>Loading delicious food...</p>
+        <div className="loading-container">
+          <div className="app-spinner app-spinner-lg" aria-hidden="true" />
+          <p>Loading delicious food...</p>
+        </div>
       ) : error ? (
         <p role="alert">{error}</p>
       ) : (
         <FoodList
           foods={foods}
           cart={cart}
+          updatingItemId={updatingItemId}
           onAddToCart={onAddToCart}
           onIncrease={onIncrease}
           onDecrease={onDecrease}

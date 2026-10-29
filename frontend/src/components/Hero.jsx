@@ -1,3 +1,5 @@
+import { FlameIcon, UtensilsIcon, PackageIcon, StarIcon, LightningIcon, PizzaIcon } from "./Icons";
+
 function Hero({ onBuyFoods, onExploreOrders }) {
   return (
     <section className="hero-section">
@@ -5,7 +7,10 @@ function Hero({ onBuyFoods, onExploreOrders }) {
         <div className="hero-main-grid">
           <div className="hero-content">
             <div className="hero-badge-wrap">
-              <span className="hero-badge-pill">🔥 30-Min Express Delivery</span>
+              <span className="hero-badge-pill">
+                <FlameIcon size={14} color="#fff" />
+                <span>30-Min Express Delivery</span>
+              </span>
               <span className="hero-badge-sub">Fresh Ingredients Daily</span>
             </div>
 
@@ -25,7 +30,7 @@ function Hero({ onBuyFoods, onExploreOrders }) {
                 className="hero-primary-btn"
                 onClick={onBuyFoods}
               >
-                🍽️ Buy Foods Now
+                <UtensilsIcon size={18} /> <span>Buy Foods Now</span>
               </button>
               {onExploreOrders && (
                 <button
@@ -33,7 +38,7 @@ function Hero({ onBuyFoods, onExploreOrders }) {
                   className="hero-secondary-btn"
                   onClick={onExploreOrders}
                 >
-                  📦 Track Orders
+                  <PackageIcon size={18} /> <span>Track Orders</span>
                 </button>
               )}
             </div>
@@ -45,7 +50,9 @@ function Hero({ onBuyFoods, onExploreOrders }) {
               </div>
               <div className="stat-divider"></div>
               <div className="hero-stat">
-                <span className="stat-number">4.8★</span>
+                <span className="stat-number stat-with-icon">
+                  4.8<StarIcon size={17} color="#f59e0b" />
+                </span>
                 <span className="stat-label">Customer Rating</span>
               </div>
               <div className="stat-divider"></div>
@@ -64,14 +71,18 @@ function Hero({ onBuyFoods, onExploreOrders }) {
                 className="hero-main-img"
               />
               <div className="hero-floating-tag top-tag">
-                <span className="tag-icon">⚡</span>
+                <span className="tag-icon">
+                  <LightningIcon size={20} color="#e45b32" />
+                </span>
                 <div>
                   <strong>Super Fast</strong>
                   <p>Average 25 min delivery</p>
                 </div>
               </div>
               <div className="hero-floating-tag bottom-tag">
-                <span className="tag-icon">🍕</span>
+                <span className="tag-icon">
+                  <PizzaIcon size={20} color="#e45b32" />
+                </span>
                 <div>
                   <strong>Chef's Special Pizza</strong>
                   <p>Starting at ₹249</p>

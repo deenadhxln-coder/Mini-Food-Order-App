@@ -1,4 +1,6 @@
 
+import { CheckIcon } from "./Icons";
+
 function OrderConfirmation({ order, onContinueShopping, onCancelOrder, onViewOrders, isCancelling = false }) {
   function handleCancel() {
     if (window.confirm("Are you sure you want to cancel this order?")) {
@@ -27,7 +29,9 @@ function OrderConfirmation({ order, onContinueShopping, onCancelOrder, onViewOrd
 
   return (
     <section className="confirmation-page">
-      <div className="confirmation-icon">✓</div>
+      <div className="confirmation-icon">
+        <CheckIcon size={34} color="#18864b" />
+      </div>
 
       <h2>Order Placed Successfully!</h2>
       <p><strong>Order ID:</strong> {order._id || order.orderId}</p>

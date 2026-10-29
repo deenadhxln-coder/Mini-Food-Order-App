@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { ArrowLeftIcon } from "./Icons";
 
 function Checkout({ cart, onPlaceOrder, onBack, isPlacingOrder = false, submitError = "" }) {
   const [customer, setCustomer] = useState({
@@ -65,7 +66,7 @@ function Checkout({ cart, onPlaceOrder, onBack, isPlacingOrder = false, submitEr
         className="back-button"
         onClick={onBack}
       >
-        ← Back to Cart
+        <ArrowLeftIcon size={16} /> Back to Cart
       </button>
 
       <h2>Checkout</h2>
@@ -120,7 +121,14 @@ function Checkout({ cart, onPlaceOrder, onBack, isPlacingOrder = false, submitEr
             className="place-order-button"
             disabled={cart.length === 0 || isPlacingOrder}
           >
-            {isPlacingOrder ? "Placing Order..." : `Place Order · ₹${totalPrice}`}
+            {isPlacingOrder ? (
+              <span className="btn-spinner-wrap">
+                <span className="app-spinner app-spinner-sm btn-spinner" aria-hidden="true" />
+                Placing Order...
+              </span>
+            ) : (
+              `Place Order · ₹${totalPrice}`
+            )}
           </button>
         </form>
 

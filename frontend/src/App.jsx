@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -40,6 +39,7 @@ function App() {
   const [cart, setCart] = useState([]);
   const [cartLoading, setCartLoading] = useState(false);
   const [cartError, setCartError] = useState("");
+  const [updatingCartId, setUpdatingCartId] = useState(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [orders, setOrders] = useState([]);
@@ -150,6 +150,7 @@ function App() {
     const foodId = food.id || food._id;
 
     try {
+      setUpdatingCartId(foodId);
       const data = await cartApiRequest("/add", {
         method: "POST",
         body: JSON.stringify({ foodId, food }),
@@ -162,11 +163,21 @@ function App() {
     } catch (error) {
       console.error("Failed to add to cart:", error);
       setToast(error.message || "Failed to add item to cart.");
+    } finally {
+      setUpdatingCartId(null);
     }
   }
 
   async function handleIncrease(id) {
     try {
+      setUpdatingCartId(id);
+      // Instant optimistic update so UI does not feel stuck
+      setCart((prevCart) =>
+        prevCart.map((item) =>
+          item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        )
+      );
+
       const data = await cartApiRequest(`/increase/${id}`, {
         method: "PATCH",
       });
@@ -177,11 +188,24 @@ function App() {
     } catch (error) {
       console.error("Failed to increase quantity:", error);
       setToast(error.message || "Failed to update item quantity.");
+      fetchCart();
+    } finally {
+      setUpdatingCartId(null);
     }
   }
 
   async function handleDecrease(id) {
     try {
+      setUpdatingCartId(id);
+      // Instant optimistic update so UI does not feel stuck
+      setCart((prevCart) =>
+        prevCart
+          .map((item) =>
+            item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+          )
+          .filter((item) => item.quantity > 0)
+      );
+
       const data = await cartApiRequest(`/decrease/${id}`, {
         method: "PATCH",
       });
@@ -192,12 +216,16 @@ function App() {
     } catch (error) {
       console.error("Failed to decrease quantity:", error);
       setToast(error.message || "Failed to update item quantity.");
+      fetchCart();
+    } finally {
+      setUpdatingCartId(null);
     }
   }
 
   async function handleRemove(id) {
     const item = cart.find((food) => food.id === id);
     try {
+      setUpdatingCartId(id);
       const data = await cartApiRequest(`/item/${id}`, {
         method: "DELETE",
       });
@@ -211,6 +239,9 @@ function App() {
     } catch (error) {
       console.error("Failed to remove item:", error);
       setToast(error.message || "Failed to remove item.");
+      fetchCart();
+    } finally {
+      setUpdatingCartId(null);
     }
   }
 
@@ -388,18 +419,19 @@ function App() {
             search={search}
             setSearch={setSearch}
             category={category}
-              setCategory={setCategory}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
-              categories={categories}
-              foods={filteredFoods}
-              loading={foodsLoading}
-              error={foodsError}
-              cart={cart}
-              onAddToCart={handleAddToCart}
-              onIncrease={handleIncrease}
-              onDecrease={handleDecrease}
-            />
+            setCategory={setCategory}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+            categories={categories}
+            foods={filteredFoods}
+            loading={foodsLoading}
+            error={foodsError}
+            cart={cart}
+            updatingItemId={updatingCartId}
+            onAddToCart={handleAddToCart}
+            onIncrease={handleIncrease}
+            onDecrease={handleDecrease}
+          />
         )}
 
         {view === "cart" && (
@@ -407,6 +439,7 @@ function App() {
             cart={cart}
             loading={cartLoading}
             error={cartError}
+            updatingItemId={updatingCartId}
             onIncrease={handleIncrease}
             onDecrease={handleDecrease}
             onRemove={handleRemove}

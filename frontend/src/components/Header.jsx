@@ -1,3 +1,5 @@
+import { BurgerIcon, UtensilsIcon, PackageIcon, CartIcon } from "./Icons";
+
 function Header({ view, totalItems, onToggleCart, onToggleOrders, onBuyFoods, onGoHome }) {
   return (
     <header className="app-header">
@@ -12,7 +14,9 @@ function Header({ view, totalItems, onToggleCart, onToggleOrders, onBuyFoods, on
           }
         }}
       >
-        <span className="brand-logo">🍔</span>
+        <span className="brand-logo">
+          <BurgerIcon size={28} />
+        </span>
         <div>
           <h1 className="brand-name">Foodie</h1>
           <p className="brand-tagline">Fresh & Fast Delights</p>
@@ -25,7 +29,7 @@ function Header({ view, totalItems, onToggleCart, onToggleOrders, onBuyFoods, on
           className={`nav-button ${view === "menu" ? "nav-button-active" : ""}`}
           onClick={onBuyFoods || onGoHome}
         >
-          🍽️ Buy Foods
+          <UtensilsIcon size={16} /> <span>Buy Foods</span>
         </button>
 
         <button
@@ -33,7 +37,7 @@ function Header({ view, totalItems, onToggleCart, onToggleOrders, onBuyFoods, on
           className={`nav-button ${view === "orders" ? "nav-button-active" : ""}`}
           onClick={onToggleOrders}
         >
-          📦 My Orders
+          <PackageIcon size={16} /> <span>My Orders</span>
         </button>
 
         <button
@@ -42,7 +46,7 @@ function Header({ view, totalItems, onToggleCart, onToggleOrders, onBuyFoods, on
           onClick={onToggleCart}
           aria-label={`View shopping cart with ${totalItems} items`}
         >
-          🛒 Cart <span className="cart-badge">{totalItems}</span>
+          <CartIcon size={16} /> <span>Cart</span> <span className="cart-badge">{totalItems}</span>
         </button>
       </nav>
     </header>

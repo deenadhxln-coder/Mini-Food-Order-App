@@ -1,3 +1,5 @@
+import { ArrowLeftIcon, RefreshIcon } from "./Icons";
+
 function OrdersView({
   orders = [],
   loading = false,
@@ -45,7 +47,7 @@ function OrdersView({
     <section className="orders-section">
       <div className="orders-header">
         <button type="button" className="back-button" onClick={onBackToMenu}>
-          ← Back to Menu
+          <ArrowLeftIcon size={16} /> Back to Menu
         </button>
         <h2>My Orders</h2>
         <button
@@ -55,11 +57,16 @@ function OrdersView({
           disabled={loading}
           title="Refresh orders"
         >
-          ↻ Refresh
+          <RefreshIcon size={14} /> Refresh
         </button>
       </div>
 
-      {loading && <p className="loading-message">Loading your orders...</p>}
+      {loading && (
+        <div className="loading-container">
+          <div className="app-spinner app-spinner-lg" aria-hidden="true" />
+          <p>Loading your orders...</p>
+        </div>
+      )}
       {error && <p className="form-error" role="alert">{error}</p>}
 
       {!loading && !error && orders.length === 0 && (
